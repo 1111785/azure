@@ -1,0 +1,1 @@
+let server: Server = new Server(process.env.PORT || 3000);
