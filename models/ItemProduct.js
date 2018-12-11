@@ -30,6 +30,16 @@ var ItemProductSchema = new Schema({
         min: 0,
         require: true
     },
+    materialId: { 
+        type: Number, 
+        min: 1,
+        require: true
+    },
+    finishingId: { 
+        type: Number, 
+        min: 1,
+        require: true
+    }
 });
 
 

@@ -35,8 +35,10 @@ module.exports = {
         order.client = req.body.client;
 
         order.save(function(err) {
-            if (err)
+            if (err){
                 res.send(err);
+                return
+            }
 
             res.json({ message: 'Order created!', orderID: order._id });
         });
