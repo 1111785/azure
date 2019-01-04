@@ -32,7 +32,7 @@ module.exports = {
         var order = new Order();
 
         order.itemProducts = req.body.itemProducts;
-        order.client = req.body.client;
+        order.user = req.body.user;
 
         order.save(function(err) {
             if (err)
@@ -53,7 +53,7 @@ module.exports = {
             }
 
             order.itemProducts = req.body.itemProducts;
-            order.client = req.body.client; 
+            order.user = req.body.user; 
 
             order.save(function(err) {
                 if (err)

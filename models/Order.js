@@ -6,7 +6,7 @@ var OrderSchema = new Schema({
     itemProducts: [{
         itemProduct: { type: Schema.Types.ObjectId, ref: 'ItemProduct' }, 
     }],
-    client: { type: Schema.Types.ObjectId, ref: 'Client', require: true }
+    user: { type: Schema.Types.ObjectId, ref: 'User', require: true }
 });
 
 

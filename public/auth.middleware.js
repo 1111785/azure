@@ -1,5 +1,6 @@
 const authService = require('../services/auth.service');
 const User        = require('../models/User');
+var jwthelper    = require('jwt-decode');
 
 function isAuthenticated(){
     return function(req, res, next){
@@ -14,6 +15,7 @@ function isAuthenticated(){
             if(err){
                 return res.status(401).json({error: 'invalid_token', message: err.message});
             }
+            console.log(decoded.sub);
             
             //Make sure the user associated with the token is valid
             User.findOne({email: decoded.sub})
@@ -80,5 +82,16 @@ function getTokenFromRequest(req){
     return req.query.token;
 }
 
+function getUser(token) {
+        
+    if (!token) {
+        return null;
+    }
+
+    return jwthelper(token);
+}
+
 module.exports.isAuthenticated = isAuthenticated;
 module.exports.hasRole = hasRole;
+module.exports.getTokenFromRequest = getTokenFromRequest;
+module.exports.getUser = getUser;

@@ -1,41 +1,121 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+// BASE SETUP
+// =============================================================================
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+// call the packages we need
+var express    = require('express');        // call express
+var app        = express();                 // define our app using express
+var bodyParser = require('body-parser');
+var cors       = require('cors');
 
-var app = express();
+// configure app to use bodyParser()
+// this will let us get the data from a POST
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(cors());
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+var port = process.env.PORT || 8080;        // set our port
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+// Model Imports
+var ItemProduct = require('./models/ItemProduct');
+var Order = require('./models/Order');
+//var Client = require('./models/Client');
+var OrderController = require('./controllers/OrderController.js');
+var ItemProductController = require('./controllers/ItemProductController.js');
+var ApiController = require("./controllers/CallAPIController");
+var UserController = require("./controllers/UserController");
+var AuthController = require("./controllers/AuthController");
+
+const auth       = require('./public/auth.middleware');
+// DATABASE
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://admin:admin631@ds024748.mlab.com:24748/arqsi_2018-2019_it2', {
+    useMongoClient: true,
+});
+/*
+mongoose.connect('mongodb://admin:pass123@ds247101.mlab.com:47101/darksi', { useMongoClient: true });
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+    console.log("we're connected!");
+});
+*/
+mongoose.Promise = global.Promise;
+
+// ROUTES FOR OUR API
+// =============================================================================
+var router = express.Router();
+
+// middleware to use for all requests
+router.use(function(req, res, next) {
+    console.log('New request @ ', req.originalUrl)
+    next();
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+// Auth
+router.route('/auth')
+    .get(AuthController.getUsers);
+router.route('/auth/login')
+    .post(AuthController.login);
+router.route('/auth/register')
+    .post(AuthController.register);
+router.route('/auth/remove')
+    .post(auth.isAuthenticated(), AuthController.remove);
+router.route('/auth/edit')
+    .put(AuthController.edit);
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+// Orders
+router.route('/orders')
+    .get(OrderController.getOrders)
+    .post(OrderController.createOrder);
+
+router.route('/orders/:id')
+    .get(OrderController.getOrderById)
+    .put(OrderController.updateOrder)
+    .delete(OrderController.deleteOrder);
+
+// Item Product
+router.route('/itemProduct')
+    .get(ItemProductController.getItemProducts)
+    .post(ItemProductController.createItemProduct);
+
+router.route('/itemProduct/:id')
+    .get(ItemProductController.getItemProductById)
+    .put(ItemProductController.updateItemProduct)
+    .delete(ItemProductController.deleteItemProduct);
+
+// Clients
+router.route('/client')
+    .get(UserController.getClients)
+    .post(UserController.createClient)
+
+router.route('/client/:id')
+    .get(UserController.getClientById)
+    .put(UserController.updateClient)
+    .delete(UserController.deleteClient);
+
+// Others
+router.route('/checkRestrictions/:id')
+    .get(ApiController.checkRestrictions)
+
+// 404
+router.use((req, res, next) => {
+    const err = new Error('Not Found');
+    err.status = 404;
+    next(err);
+  });
+  
+router.use((err, req, res, next) => {
+    res.locals.error = err;
+    res.status(err.status).send(err);
 });
 
+// REGISTER OUR ROUTES
+// accessed at GET http://localhost:8080/api)
+app.use('/api', router);
+
+// START THE SERVER
+app.listen(port);
+console.log('Magic happens on port ' + port);
 module.exports = app;

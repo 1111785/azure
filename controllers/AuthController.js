@@ -1,17 +1,16 @@
 const User = require('../models/User');
+const Order = require('../models/Order');
 const authService = require('../services/auth.service');
 const _ = require('lodash');
 const utils = require('../components/utils');
+const auth       = require('../public/auth.middleware');
 
 module.exports = {
     login:function(req, res) {
-        console.log(req.body.email);
-        console.log(req.body.password);
         User.findOne({
             'email': req.body.email
         })
         .then(user => {
-            console.log(user);
             if (!user) {
                 return res.status(401).json({ error: 'invalid_user', message: 'O email e/ou password que introduziu não são válidos.' });
             }
@@ -31,7 +30,7 @@ module.exports = {
         user.email = req.body.email;
         user.name = req.body.name;
         user.password = req.body.password;
-        user.role = req.body.role;
+        user.role = "client";
         user.address = req.body.address;
         user.save()
         .then(function(user) {
@@ -53,13 +52,54 @@ module.exports = {
     },
 
     remove:function(req, res) {
-        console.log("REMOVE");
-        User.findByIdAndRemove({  _id: req.user._id },
-        function (err, user) {
+        Order.find( { user: req.body.user.id },
+        function (err, orders) {
             if (err)
                 res.send(err);
+            
+            if (orders) {
+                orders.forEach(order => {
+                    order.User = null;
+                    order.save(
+                        function (err) {
+                            if (err)
+                                res.send(err);
+                        }
+                    )
+                });
+            }
+            var token = auth.getTokenFromRequest(req);
+            var auxid = auth.getUser(token).id;
+            if (req.body.user.id == auxid) {
+                User.findByIdAndRemove({  _id: req.body.user.id },
+                function (err) {
+                    if (err)
+                        res.send(err);
+    
+                    res.json({ message: "User removed with success" });
+                });
+            } else {
+                res.status(401)
+            }
+        });
+    },
 
-            res.json({ message: "User removed with success" });
+    getUsers:function(req, res) {
+        User.find(function (err, users) {
+            res.json(users);
+        });
+    },
+
+    edit:function(req, res) {
+        newUser = req.body.newUser;
+        oldUser = auth.getUser(token);
+        User.findOne({
+            'email': oldUser.email
+        }, function (err, user) {
+
+
+
+            res.json(user);
         });
     }
 };
