@@ -15,7 +15,6 @@ function isAuthenticated(){
             if(err){
                 return res.status(401).json({error: 'invalid_token', message: err.message});
             }
-            console.log(decoded.sub);
             
             //Make sure the user associated with the token is valid
             User.findOne({email: decoded.sub})

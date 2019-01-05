@@ -56,14 +56,20 @@ router.use(function(req, res, next) {
 // Auth
 router.route('/auth')
     .get(AuthController.getUsers);
+router.route('/auth/admin')
+    .get(AuthController.getUsersNotClient);
 router.route('/auth/login')
     .post(AuthController.login);
 router.route('/auth/register')
     .post(AuthController.register);
 router.route('/auth/remove')
-    .post(auth.isAuthenticated(), AuthController.remove);
+    .post(auth.isAuthenticated(), auth.hasRole("client"), AuthController.remove);
 router.route('/auth/edit')
-    .put(AuthController.edit);
+    .put(auth.isAuthenticated(), auth.hasRole("client"), AuthController.edit);
+router.route('/auth/admin/register')
+    .post(auth.isAuthenticated(), auth.hasRole("admin"), AuthController.registerAdmin);
+router.route('/auth/admin/remove')
+    .post(auth.isAuthenticated(), auth.hasRole("admin"), AuthController.removeAdmin);
 
 // Orders
 router.route('/orders')
@@ -74,6 +80,12 @@ router.route('/orders/:id')
     .get(OrderController.getOrderById)
     .put(OrderController.updateOrder)
     .delete(OrderController.deleteOrder);
+
+router.route('/orders/producer/:id')
+    .get(OrderController.getProducerOrders);
+
+router.route('/orders/producer/status')
+    .put(OrderController.nextStatus);
 
 // Item Product
 router.route('/itemProduct')

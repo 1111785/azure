@@ -6,7 +6,15 @@ var OrderSchema = new Schema({
     itemProducts: [{
         itemProduct: { type: Schema.Types.ObjectId, ref: 'ItemProduct' }, 
     }],
-    user: { type: Schema.Types.ObjectId, ref: 'User', require: true }
+    user: { type: Schema.Types.ObjectId, ref: 'User', require: true },
+    producer: String,
+    status: {
+        type     : String,
+        required : true,
+        enum     : ['submited', 'validated', 'assigned',
+             'producing', 'ready', 'on going', 'delivered', 
+            'received']
+    }
 });
 
 

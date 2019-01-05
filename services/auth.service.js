@@ -4,7 +4,7 @@ const guid   = require('guid');
 const moment = require('moment');
 
 let signToken = (user) => {
-    let token = jwt.sign({ id: user._id, email: user.email, name: user.name, role: user.role }, config.jwt.secret, {
+    let token = jwt.sign({ id: user._id, email: user.email, name: user.name, role: user.role, address: user.address }, config.jwt.secret, {
         expiresIn : "7 days",
         notBefore : 0,                     //now
         audience  : config.jwt.audience,
