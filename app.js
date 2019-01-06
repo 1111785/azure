@@ -76,16 +76,25 @@ router.route('/orders')
     .get(OrderController.getOrders)
     .post(OrderController.createOrder);
 
+router.route('/orders/deliver')
+    .put(OrderController.deliverOrders);
+
 router.route('/orders/:id')
     .get(OrderController.getOrderById)
     .put(OrderController.updateOrder)
     .delete(OrderController.deleteOrder);
+
+router.route('/orders/ready/producer/:id')
+    .get(OrderController.getProducerOrdersReady);
 
 router.route('/orders/producer/:id')
     .get(OrderController.getProducerOrders);
 
 router.route('/orders/producer/status')
     .put(OrderController.nextStatus);
+
+router.route('/orders/calcPath/:id')
+    .put(OrderController.calcPath);
 
 // Item Product
 router.route('/itemProduct')
